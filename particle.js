@@ -8,7 +8,7 @@ const BASE_RADIUS = {
     electrons: 5,
 };
 
-const ELETROCPHERES_OFFSET = [10, 10, 10, 10, 10, 10, 10];
+const ELECTROSPHERE_OFFSET = [10, 10, 10, 10, 10, 10, 10];
 
 const ELECTRONS_PER_ELECTROSPHERE = [2, 8, 18, 32, 32, 18, 2];
 
@@ -81,7 +81,7 @@ export const particleFactory = (minWidth, maxWidth, minHeight, maxHeight) => ({
         context.strokeStyle = '#fff';
         let offset = 0;
         for (let i = 0; i < this.electrospheres; i++) {
-            offset += ELETROCPHERES_OFFSET[i];
+            offset += ELECTROSPHERE_OFFSET[i];
             context.beginPath();
             context.arc(this.position.x, this.position.y, this.coreRadius + offset, 0, Math.PI * 2);
             context.stroke();
