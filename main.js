@@ -39,7 +39,7 @@ const loop = () => {
 window.addEventListener('load', start);
 
 const initSimulation = () => {
-    const particleCount = 10;
+    const particleCount = 1;
     const minWidth = -width / 2;
     const maxWidth = width / 2;
     const minHeight = -height / 2;
