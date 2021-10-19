@@ -8,7 +8,7 @@ const BASE_RADIUS = {
     electrons: 5,
 };
 
-const ELECTROSPHERE_OFFSET = [10, 10, 10, 10, 10, 10, 10];
+const ELECTROSPHERE_OFFSET = [15, 25, 30, 40, 50, 60, 15];
 
 const ELECTRONS_PER_ELECTROSPHERE = [2, 8, 18, 32, 32, 18, 2];
 
@@ -66,18 +66,13 @@ export const particleFactory = (minWidth, maxWidth, minHeight, maxHeight) => ({
         this.coreRadius = BASE_RADIUS.neutrons * this.neutrons + BASE_RADIUS.protons * this.protons;
         this.electrospheres = computeElectrospheres(this.electrons);
     },
-    draw: function(context) {
-        // core
+    drawCore: function (context) {
         context.fillStyle = this.color;
         context.beginPath();
-        context.arc(this.position.x, this.position.y, this.coreRadius, 0, Math.PI * 2);
+        context.arc(this.position.x, this.position.y, this.coreRadius, 0, 2 * Math.PI, false);
         context.fill();
-        // symbol text
-        context.fillStyle = '#000';
-        const halfRadius = this.coreRadius / 2;
-        context.font = `${this.coreRadius}px Arial`;
-        context.fillText(this.symbol, this.position.x - halfRadius, this.position.y + halfRadius / 1.5);
-        // electrospheres
+    },
+    drawElectrospheres: function (context) {
         context.strokeStyle = '#fff';
         let offset = 0;
         for (let i = 0; i < this.electrospheres; i++) {
@@ -86,5 +81,37 @@ export const particleFactory = (minWidth, maxWidth, minHeight, maxHeight) => ({
             context.arc(this.position.x, this.position.y, this.coreRadius + offset, 0, Math.PI * 2);
             context.stroke();
         }
+    },
+    drawElectrons: function (context) {
+        // https://stackoverflow.com/questions/32681610/drawing-point-on-circle
+        context.fillStyle = '#f00';
+        let offset = 0;
+        let electronCount = this.electrons;
+        for (let i = 0; i < this.electrospheres && electronCount > 0; i++) {
+            offset += ELECTROSPHERE_OFFSET[i];
+            const electronsToDraw = ELECTRONS_PER_ELECTROSPHERE[i];
+            const radius = this.coreRadius + offset;
+            const angle = Math.PI * 2 / Math.min(electronCount, electronsToDraw);
+            for (let j = 0; j < electronsToDraw && electronCount > 0; j++) {
+                context.beginPath();
+                const x = this.position.x + radius * Math.cos(angle * j);
+                const y = this.position.y + radius * Math.sin(angle * j);
+                context.arc(x, y, BASE_RADIUS.electrons, 0, 2 * Math.PI, false);
+                context.fill();
+                electronCount--;
+            }
+        }
+    },
+    drawText: function (context) {
+        context.fillStyle = '#000';
+        const halfRadius = this.coreRadius / 2;
+        context.font = `${this.coreRadius}px Arial`;
+        context.fillText(this.symbol, this.position.x - halfRadius, this.position.y + halfRadius / 1.5);
+    },
+    draw: function(context) {
+        this.drawCore(context);
+        this.drawText(context);
+        this.drawElectrospheres(context);
+        this.drawElectrons(context);
     },
 });
