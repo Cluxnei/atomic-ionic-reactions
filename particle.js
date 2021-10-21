@@ -3,9 +3,9 @@ import {random} from './helpers.js';
 export const particles = [];
 
 const BASE_RADIUS = {
-    protons: 10,
-    neutrons: 10,
-    electrons: 5,
+    protons: 5,
+    neutrons: 5,
+    electrons: 2,
 };
 
 const ELECTROSPHERE_OFFSET = [15, 25, 30, 40, 50, 60, 15];
@@ -62,9 +62,31 @@ export const particleFactory = (minWidth, maxWidth, minHeight, maxHeight) => ({
     position: {x: random(minWidth, maxWidth), y: random(minHeight, maxHeight)},
     velocity: {x: 0, y: 0},
     acceleration: {x: 0, y: 0},
+    updateCoreRadius: true,
+    charge: 0,
     update: function () {
-        this.coreRadius = BASE_RADIUS.neutrons * this.neutrons + BASE_RADIUS.protons * this.protons;
+        if (this.updateCoreRadius) {
+            this.coreRadius = BASE_RADIUS.neutrons * this.neutrons + BASE_RADIUS.protons * this.protons;
+            this.updateCoreRadius = false;
+        }
+        // TODO: check if update is needed
         this.electrospheres = computeElectrospheres(this.electrons);
+
+        this.computeAcceleration();
+        this.computeVelocity();
+        this.computePosition();
+    },
+    computeVelocity: function () {
+        this.velocity.x += this.acceleration.x;
+        this.velocity.y += this.acceleration.y;
+    },
+    computePosition: function () {
+        this.position.x += this.velocity.x;
+        this.position.y += this.velocity.y;
+    },
+    computeAcceleration: function () {
+        this.acceleration.x = 0;
+        this.acceleration.y = 0;
     },
     drawCore: function (context) {
         context.fillStyle = this.color;
