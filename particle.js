@@ -3,7 +3,7 @@ import {random} from './helpers.js';
 export const particles = [];
 
 const BASE_RADIUS = {
-    protons: 5,
+    protons: 4,
     neutrons: 5,
     electrons: 2,
 };
@@ -41,8 +41,89 @@ export const periodicTable = [
         relativeMass: 6.941,
         protons: 3,
         neutrons: 4,
-        electrons: 100,
+        electrons: 3,
     },
+        {
+        name: 'Beryllium',
+        color: '#c8c8c8',
+        atomicNumber: 4,
+        symbol: 'Be',
+        relativeMass: 9.012182,
+        protons: 4,
+        neutrons: 5,
+        electrons: 4,
+    },
+    {
+        name: 'Boron',
+        color: '#7d5353',
+        atomicNumber: 5,
+        symbol: 'B',
+        relativeMass: 10.811,
+        protons: 5,
+        neutrons: 6,
+        electrons: 5,
+    },
+    {
+        name: 'Carbon',
+        color: '#3b3b3b',
+        atomicNumber: 6,
+        symbol: 'C',
+        relativeMass: 12.0107,
+        protons: 6,
+        neutrons: 7,
+        electrons: 6,
+    },
+    {
+        name: 'Nitrogen',
+        color: '#2cc6b2',
+        atomicNumber: 7,
+        symbol: 'N',
+        relativeMass: 14.0067,
+        protons: 7,
+        neutrons: 8,
+        electrons: 7,
+    },
+    {
+        name: 'Oxygen',
+        color: '#6fec98',
+        atomicNumber: 8,
+        symbol: 'O',
+        relativeMass: 15.9994,
+        protons: 8,
+        neutrons: 9,
+        electrons: 8,
+    },
+    {
+        name: 'Fluorine',
+        color: '#ecc46f',
+        atomicNumber: 9,
+        symbol: 'F',
+        relativeMass: 18.9984032,
+        protons: 9,
+        neutrons: 10,
+        electrons: 9,
+    },
+    {
+        name: 'Neon',
+        color: '#be0086',
+        atomicNumber: 10,
+        symbol: 'Ne',
+        relativeMass: 20.1797,
+        protons: 10,
+        neutrons: 11,
+        electrons: 10,
+    },
+    {
+        name: 'Sodium',
+        color: '#e69d7a',
+        atomicNumber: 11,
+        symbol: 'Na',
+        relativeMass: 22.98976928,
+        protons: 11,
+        neutrons: 12,
+        electrons: 11,
+    },
+    ...
 ];
 
 const randomInPeriodicTable = () => periodicTable[random(0, periodicTable.length, true)];
@@ -64,6 +145,8 @@ export const particleFactory = (minWidth, maxWidth, minHeight, maxHeight) => ({
     acceleration: {x: 0, y: 0},
     updateCoreRadius: true,
     charge: 0,
+    tendenceToStable: 0,
+    electroNegativity: 0,
     update: function () {
         if (this.updateCoreRadius) {
             this.coreRadius = BASE_RADIUS.neutrons * this.neutrons + BASE_RADIUS.protons * this.protons;
@@ -71,10 +154,41 @@ export const particleFactory = (minWidth, maxWidth, minHeight, maxHeight) => ({
         }
         // TODO: check if update is needed
         this.electrospheres = computeElectrospheres(this.electrons);
-
+        this.computeCharge();
+        this.computeTendenceToStable();
         this.computeAcceleration();
         this.computeVelocity();
         this.computePosition();
+        console.log(this.symbol, this.tendenceToStable);
+    },
+    computeTendenceToStable: function () {
+        const n = this.getNumberOfElectronsInElectrosphereLayer(this.electrospheres);
+        const electronsToFillLayer = ELECTRONS_PER_ELECTROSPHERE[this.electrospheres - 1];
+        if (this.electrospheres === 1) {
+            this.tendenceToStable = electronsToFillLayer - n;
+            return;
+        }
+        if (Math.abs(n) < Math.abs(electronsToFillLayer - n)) {
+            this.tendenceToStable = -n;
+            return;
+        }
+        this.tendenceToStable = electronsToFillLayer - n;
+    },
+    getNumberOfElectronsInElectrosphereLayer: function (layer) {
+        let electronCount = this.electrons;
+        for (let i = 0; i < this.electrospheres && electronCount > 0; i++) {
+            if (i === layer - 1) {
+                return electronCount;
+            }
+            const electronsInThisLayer = ELECTRONS_PER_ELECTROSPHERE[i];
+            for (let j = 0; j < electronsInThisLayer && electronCount > 0; j++) {
+                electronCount--;
+            }
+        }
+        return 0;
+    },
+    computeCharge: function () {
+        this.charge = this.protons - this.electrons;
     },
     computeVelocity: function () {
         this.velocity.x += this.acceleration.x;
@@ -136,8 +250,13 @@ export const particleFactory = (minWidth, maxWidth, minHeight, maxHeight) => ({
     drawText: function (context) {
         context.fillStyle = '#000';
         const halfRadius = this.coreRadius / 2;
-        context.font = `${this.coreRadius}px Arial`;
-        context.fillText(this.symbol, this.position.x - halfRadius, this.position.y + halfRadius / 1.5);
+        context.font = `${this.coreRadius / 1.5}px Arial`;
+        let text = this.symbol;
+        if (this.charge !== 0) {
+            const absCharge = Math.abs(this.charge);
+            text += (this.charge > 0 ? '+' : '-') + (absCharge > 1 ? absCharge : '');
+        }
+        context.fillText(text, this.position.x - halfRadius, this.position.y + halfRadius / 2.5);
     },
     draw: function(context) {
         this.drawCore(context);
