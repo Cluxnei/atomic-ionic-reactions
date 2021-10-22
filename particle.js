@@ -123,7 +123,7 @@ export const periodicTable = [
         neutrons: 12,
         electrons: 11,
     },
-    ...
+    // ...
 ];
 
 const randomInPeriodicTable = () => periodicTable[random(0, periodicTable.length, true)];
