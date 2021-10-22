@@ -1,134 +1,23 @@
 import {random} from './helpers.js';
+import {periodicTable} from './periodicTable.js';
 
 export const particles = [];
 
 const BASE_RADIUS = {
-    protons: 4,
-    neutrons: 5,
+    protons: 1,
+    neutrons: 1,
     electrons: 2,
 };
 
-const ELECTROSPHERE_OFFSET = [15, 25, 30, 40, 50, 60, 15];
+const FIXED_RADIUS = 20;
+
+// const ELECTROSPHERE_OFFSET = [15, 25, 30, 40, 50, 60, 15];
+const ELECTROSPHERE_OFFSET = [10, 10, 10, 10, 10, 10, 10];
 const ELECTROSPHERES_NAMES = ['s', 'p', 'd', 'f', 'g', 'h', 'i'];
 const ELECTRONS_PER_ELECTROSPHERE = [2, 8, 18, 32, 32, 18, 2];
-const K = 500;
-
-export const periodicTable = [
-    {
-        name: 'Hydrogen', 
-        color: '#63b9d5', 
-        atomicNumber: 1,
-        symbol: 'H',
-        relativeMass: 1.00794,
-        protons: 1,
-        neutrons: 0,
-        electrons: 1,
-    },
-    {
-        name: 'Helium',
-        color: '#d1c991',
-        atomicNumber: 2,
-        symbol: 'He',
-        relativeMass: 4.002602,
-        protons: 2,
-        neutrons: 2,
-        electrons: 2,
-    },
-    {
-        name: 'Lithium',
-        color: '#4c6168',
-        atomicNumber: 3,
-        symbol: 'Li',
-        relativeMass: 6.941,
-        protons: 3,
-        neutrons: 4,
-        electrons: 3,
-    },
-        {
-        name: 'Beryllium',
-        color: '#c8c8c8',
-        atomicNumber: 4,
-        symbol: 'Be',
-        relativeMass: 9.012182,
-        protons: 4,
-        neutrons: 5,
-        electrons: 4,
-    },
-    {
-        name: 'Boron',
-        color: '#7d5353',
-        atomicNumber: 5,
-        symbol: 'B',
-        relativeMass: 10.811,
-        protons: 5,
-        neutrons: 6,
-        electrons: 5,
-    },
-    {
-        name: 'Carbon',
-        color: '#3b3b3b',
-        atomicNumber: 6,
-        symbol: 'C',
-        relativeMass: 12.0107,
-        protons: 6,
-        neutrons: 7,
-        electrons: 6,
-    },
-    {
-        name: 'Nitrogen',
-        color: '#2cc6b2',
-        atomicNumber: 7,
-        symbol: 'N',
-        relativeMass: 14.0067,
-        protons: 7,
-        neutrons: 8,
-        electrons: 7,
-    },
-    {
-        name: 'Oxygen',
-        color: '#6fec98',
-        atomicNumber: 8,
-        symbol: 'O',
-        relativeMass: 15.9994,
-        protons: 8,
-        neutrons: 9,
-        electrons: 8,
-    },
-    {
-        name: 'Fluorine',
-        color: '#ecc46f',
-        atomicNumber: 9,
-        symbol: 'F',
-        relativeMass: 18.9984032,
-        protons: 9,
-        neutrons: 10,
-        electrons: 9,
-    },
-    {
-        name: 'Neon',
-        color: '#be0086',
-        atomicNumber: 10,
-        symbol: 'Ne',
-        relativeMass: 20.1797,
-        protons: 10,
-        neutrons: 11,
-        electrons: 10,
-    },
-    {
-        name: 'Sodium',
-        color: '#e69d7a',
-        atomicNumber: 11,
-        symbol: 'Na',
-        relativeMass: 22.98976928,
-        protons: 11,
-        neutrons: 12,
-        electrons: 11,
-    },
-    // ...
-];
+const K = 1;
 
 const randomInPeriodicTable = () => periodicTable[random(0, periodicTable.length, true)];
-
 
 const applyColumbLaw = (chargeA, chargeB, distance) => {
     return K * -(chargeA * chargeB) / (distance * distance);
@@ -166,7 +55,8 @@ export const particleFactory = (minWidth, maxWidth, minHeight, maxHeight) => ({
     stopAfterCollision: true,
     update: function () {
         if (this.updateCoreRadius) {
-            this.coreRadius = BASE_RADIUS.neutrons * this.neutrons + BASE_RADIUS.protons * this.protons;
+            // this.coreRadius = BASE_RADIUS.neutrons * this.neutrons + BASE_RADIUS.protons * this.protons;
+            this.coreRadius = FIXED_RADIUS;
             this.updateCoreRadius = false;
         }
         // TODO: check if update is needed
@@ -274,7 +164,6 @@ export const particleFactory = (minWidth, maxWidth, minHeight, maxHeight) => ({
                 y: particle.position.y - this.position.y,
             };
             const distance = Math.hypot(distanceVector.x, distanceVector.y);
-            
             const normalized = normalizeVector(distanceVector);
             const force = applyColumbLaw(this.tendenceToStable, particle.tendenceToStable, distance);
             this.acceleration.x += normalized.x * force;
@@ -328,8 +217,8 @@ export const particleFactory = (minWidth, maxWidth, minHeight, maxHeight) => ({
     },
     drawText: function (context) {
         context.fillStyle = '#000';
-        const halfRadius = this.coreRadius / 2;
-        context.font = `${this.coreRadius / 1.5}px Arial`;
+        const halfRadius = this.coreRadius / 1.5;
+        context.font = `${this.coreRadius / 2}px Arial`;
         let text = this.symbol;
         if (this.charge !== 0) {
             const absCharge = Math.abs(this.charge);

@@ -7,7 +7,7 @@ export const random = (min, max, absolute = false) => {
 export const initCanvas = () => {
     const canvas = document.querySelector('#canvas');
     
-    canvas.zoom = 1;
+    canvas.zoom = 0.4;
     canvas.positionX = 0;
     canvas.positionY = 0;
     
@@ -33,7 +33,7 @@ export const initCanvas = () => {
     });
 
     canvas.addEventListener('wheel', (event) =>{        
-        canvas.zoom -= event.deltaY / 1000 * canvas.zoom;
+        canvas.zoom -= event.deltaY / 3000 * canvas.zoom;
     });
     
     window.addEventListener('resize', resizeCanvas, false);
