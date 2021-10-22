@@ -31,6 +31,12 @@ const update = () => {
 };
 
 const loop = () => {
+    console.log(particles.map(particle => {
+        const values = Object.entries(particle).filter(([_, value]) => typeof value !== 'function');
+        return {
+            ...values.reduce((acc, [key, value]) => ({...acc, [key]: value}), {}),
+        };
+    }));
     update();
     draw();
     requestAnimationFrame(loop);
@@ -38,14 +44,22 @@ const loop = () => {
 
 window.addEventListener('load', start);
 
+const RANDOM_PARTICLES = true;
+
 const initSimulation = () => {
-    const particleCount = 3;
-    const minWidth = -width / 2;
-    const maxWidth = width / 2;
-    const minHeight = -height / 2;
-    const maxHeight = height / 2;
-    for (let i = 0; i < particleCount; i++) {
-        particles.push(particleFactory(minWidth, maxWidth, minHeight, maxHeight));
+    if (RANDOM_PARTICLES) {
+        const particleCount = 50;
+        const minWidth = -width * 2;
+        const maxWidth = width * 2;
+        const minHeight = -height * 2;
+        const maxHeight = height * 2;
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(particleFactory(minWidth, maxWidth, minHeight, maxHeight));
+        }
+        return;
     }
+    particles.push(particleFactory(0, 0, 0, 0));
+    particles.push(particleFactory(400, 400, 0, 0));
+
 };
 

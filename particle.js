@@ -11,6 +11,7 @@ const BASE_RADIUS = {
 const ELECTROSPHERE_OFFSET = [15, 25, 30, 40, 50, 60, 15];
 const ELECTROSPHERES_NAMES = ['s', 'p', 'd', 'f', 'g', 'h', 'i'];
 const ELECTRONS_PER_ELECTROSPHERE = [2, 8, 18, 32, 32, 18, 2];
+const K = 500;
 
 export const periodicTable = [
     {
@@ -129,6 +130,18 @@ export const periodicTable = [
 const randomInPeriodicTable = () => periodicTable[random(0, periodicTable.length, true)];
 
 
+const applyColumbLaw = (chargeA, chargeB, distance) => {
+    return K * -(chargeA * chargeB) / (distance * distance);
+};
+
+const normalizeVector = (vector) => {
+    const mag = Math.hypot(vector.x, vector.y);
+    return {
+        x: vector.x / mag,
+        y: vector.y / mag,
+    };
+};
+
 const computeElectrospheres = (electrons) => {
     let n = 0;
     while (electrons > 0) {
@@ -143,10 +156,14 @@ export const particleFactory = (minWidth, maxWidth, minHeight, maxHeight) => ({
     position: {x: random(minWidth, maxWidth), y: random(minHeight, maxHeight)},
     velocity: {x: 0, y: 0},
     acceleration: {x: 0, y: 0},
+    coreRadius: 0,
     updateCoreRadius: true,
     charge: 0,
     tendenceToStable: 0,
-    electroNegativity: 0,
+    electrospheres: 0,
+    electrospheresRadius: 0,
+    stopped: false,
+    stopAfterCollision: true,
     update: function () {
         if (this.updateCoreRadius) {
             this.coreRadius = BASE_RADIUS.neutrons * this.neutrons + BASE_RADIUS.protons * this.protons;
@@ -154,12 +171,46 @@ export const particleFactory = (minWidth, maxWidth, minHeight, maxHeight) => ({
         }
         // TODO: check if update is needed
         this.electrospheres = computeElectrospheres(this.electrons);
+        this.computeElectrospheresRadius();
         this.computeCharge();
         this.computeTendenceToStable();
+        const collidingWith = this.collidingWith();
+        if (collidingWith) {
+            this.collide(collidingWith);
+        }
         this.computeAcceleration();
         this.computeVelocity();
         this.computePosition();
-        console.log(this.symbol, this.tendenceToStable);
+    },
+    collide: function (particle) {
+        if (this.tendenceToStable > 0 && particle.tendenceToStable < 0) {
+            this.stopped = true;
+            particle.stopped = true;
+            const valenceShellElectrons = particle.getNumberOfElectronsInElectrosphereLayer(particle.electrospheres);
+            const electronsToGive = Math.min(Math.abs(particle.tendenceToStable), valenceShellElectrons);
+            this.electrons += electronsToGive;
+            particle.electrons -= electronsToGive;
+        }
+    },
+    collidingWith: function () {
+        return particles.find(p => p !== this && this.isCollidingWith(p));
+    },
+    isCollidingWith: function (particle) {
+        const distanceVector = {
+            x: particle.position.x - this.position.x,
+            y: particle.position.y - this.position.y,
+        };
+        const distance = Math.hypot(distanceVector.x, distanceVector.y);
+        const radius = this.coreRadius + this.electrospheresRadius;
+        const particleRadius = particle.coreRadius + particle.electrospheresRadius;
+        return distance < radius + particleRadius;
+    },
+    computeElectrospheresRadius: function () {
+        let offset = 0;
+        for (let i = 0; i < this.electrospheres; i++) {
+            offset += ELECTROSPHERE_OFFSET[i];
+        }
+        this.electrospheresRadius = offset;
     },
     computeTendenceToStable: function () {
         const n = this.getNumberOfElectronsInElectrosphereLayer(this.electrospheres);
@@ -191,16 +242,44 @@ export const particleFactory = (minWidth, maxWidth, minHeight, maxHeight) => ({
         this.charge = this.protons - this.electrons;
     },
     computeVelocity: function () {
+        if (this.stopped) {
+            this.velocity.x = 0;
+            this.velocity.y = 0;
+            return;
+        }
         this.velocity.x += this.acceleration.x;
         this.velocity.y += this.acceleration.y;
     },
     computePosition: function () {
+        if (this.stopped) {
+            return;
+        }
         this.position.x += this.velocity.x;
         this.position.y += this.velocity.y;
     },
     computeAcceleration: function () {
+        if (this.stopped) {
+            this.acceleration.x = 0;
+            this.acceleration.y = 0;
+            return;
+        }
         this.acceleration.x = 0;
         this.acceleration.y = 0;
+        particles.forEach(particle => {
+            if (particle === this) {
+                return;
+            }
+            const distanceVector = {
+                x: particle.position.x - this.position.x,
+                y: particle.position.y - this.position.y,
+            };
+            const distance = Math.hypot(distanceVector.x, distanceVector.y);
+            
+            const normalized = normalizeVector(distanceVector);
+            const force = applyColumbLaw(this.tendenceToStable, particle.tendenceToStable, distance);
+            this.acceleration.x += normalized.x * force;
+            this.acceleration.y += normalized.y * force;
+        });
     },
     drawCore: function (context) {
         context.fillStyle = this.color;
@@ -259,6 +338,7 @@ export const particleFactory = (minWidth, maxWidth, minHeight, maxHeight) => ({
         context.fillText(text, this.position.x - halfRadius, this.position.y + halfRadius / 2.5);
     },
     draw: function(context) {
+        context.globalAlpha = 0.75;
         this.drawCore(context);
         this.drawText(context);
         this.drawElectrospheres(context);
