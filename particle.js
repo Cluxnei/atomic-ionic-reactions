@@ -187,7 +187,7 @@ export const particleFactory = (minWidth, maxWidth, minHeight, maxHeight) => ({
             this.stopped = true;
             particle.stopped = true;
             const valenceShellElectrons = particle.getNumberOfElectronsInElectrosphereLayer(particle.electrospheres);
-            const electronsToGive = Math.min(Math.abs(particle.tendenceToStable), valenceShellElectrons);
+            const electronsToGive = Math.min(Math.abs(particle.tendenceToStable), valenceShellElectrons, Math.abs(this.tendenceToStable));
             this.electrons += electronsToGive;
             particle.electrons -= electronsToGive;
         }
