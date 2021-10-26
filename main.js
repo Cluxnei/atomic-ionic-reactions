@@ -94,7 +94,7 @@ const RANDOM_PARTICLES = true;
 
 const initSimulation = () => {
     if (RANDOM_PARTICLES) {
-        const particleCount = 20;
+        const particleCount = 40;
         const minWidth = -width * 1;
         const maxWidth = width * 1;
         const minHeight = -height * 1;

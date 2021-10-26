@@ -80,8 +80,6 @@ export const particleFactory = (minWidth, maxWidth, minHeight, maxHeight) => ({
     },
     collide: function (particle) {
         if (this.tendenceToStable > 0 && particle.tendenceToStable < 0) {
-            // this.stopped = true;
-            // particle.stopped = true;
             const valenceShellElectrons = particle.getNumberOfElectronsInElectrosphereLayer(particle.electrospheres);
             const electronsToGive = Math.min(Math.abs(particle.tendenceToStable), valenceShellElectrons, Math.abs(this.tendenceToStable));
             this.electrons += electronsToGive;
@@ -255,7 +253,6 @@ export const particleFactory = (minWidth, maxWidth, minHeight, maxHeight) => ({
         }
     },
     drawElectrons: function (context) {
-        // https://stackoverflow.com/questions/32681610/drawing-point-on-circle
         context.font = `${BASE_RADIUS.electrons}px Arial`;
         let offset = 0;
         let electronCount = this.electrons;
@@ -302,9 +299,9 @@ export const particleFactory = (minWidth, maxWidth, minHeight, maxHeight) => ({
     draw: function(context) {
         context.globalAlpha = 0.75;
         this.drawCore(context);
+        this.drawConnections(context);
         this.drawText(context);
         this.drawElectrospheres(context);
         this.drawElectrons(context);
-        this.drawConnections(context);
     },
 });
