@@ -10,6 +10,7 @@ export const initCanvas = () => {
     canvas.zoom = 0.4;
     canvas.positionX = 0;
     canvas.positionY = 0;
+    canvas._previousTouch = null;
     
     const resizeCanvas = () => {
         canvas.width = window.innerWidth;
@@ -22,6 +23,32 @@ export const initCanvas = () => {
         }
         canvas.positionX = (canvas.positionX || 0) + event.movementX;
         canvas.positionY = (canvas.positionY || 0) + event.movementY;
+    });
+
+    canvas.addEventListener('touchstart', (event) => {
+        canvas.dragging = true;
+        canvas._previousTouch = event.touches[0];
+    });
+
+    canvas.addEventListener('touchmove', (event) => {
+        if(!canvas.dragging) {
+            return;
+        }
+        const touch = event.touches[0];
+        if (canvas._previousTouch) {
+            event.movementX = touch.clientX - canvas._previousTouch.clientX;
+            event.movementY = touch.clientY - canvas._previousTouch.clientY;
+
+            canvas.positionX = (canvas.positionX || 0) + event.movementX;
+            canvas.positionY = (canvas.positionY || 0) + event.movementY;
+        };
+        canvas._previousTouch = touch;
+        
+    });
+
+    canvas.addEventListener('touchstop', () => {
+        canvas.dragging = false;
+        canvas._previousTouch = null;
     });
 
     canvas.addEventListener('mousedown', () => {
