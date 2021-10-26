@@ -54,10 +54,17 @@ const updateData = () => {
     
     data.values.moleculeMaxSize = connectedAtoms
         .reduce((a, b) => Math.max(a, b.connectedParticles.size), 0);
+        
+    const ignoredAtoms = new Set();
 
-    data.values.moleculesCount = 0;
-        // .map(particle => particle.connectedParticles.size)
-        // .reduce((a, b) => a + b, 0);
+    data.values.moleculesCount = connectedAtoms
+        .reduce((a, {id, connectedParticles}) => {
+            if (ignoredAtoms.has(id)) {
+                return a;
+            }
+            [...connectedParticles, id].forEach(i => ignoredAtoms.add(i));
+            return a + 1;
+        }, 0);
 };
 
 const draw = () => {
@@ -87,7 +94,7 @@ const RANDOM_PARTICLES = true;
 
 const initSimulation = () => {
     if (RANDOM_PARTICLES) {
-        const particleCount = 60;
+        const particleCount = 20;
         const minWidth = -width * 1;
         const maxWidth = width * 1;
         const minHeight = -height * 1;
