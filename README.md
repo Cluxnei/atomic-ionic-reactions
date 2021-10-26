@@ -26,8 +26,7 @@ See some images
 
 ![](https://cluxnei.com/projects/atomic-ionic-reactions/demo-images/06.png)
 
-![](https://cluxnei.com/projects/atomic-ionic-reactions/demo-images/
-07.png)
+![](https://cluxnei.com/projects/atomic-ionic-reactions/demo-images/07.png)
 
 ![](https://cluxnei.com/projects/atomic-ionic-reactions/demo-images/08.png)
 
