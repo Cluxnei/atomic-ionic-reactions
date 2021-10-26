@@ -7,10 +7,9 @@ Demo available on:
 https://cluxnei.com/projects/atomic-ionic-reactions/
 
 - This simulation use FIXED RADIUS to represent atom's cores.
-- Use Columb law (with customized K constant) to compute attraction between particles
-- Consider atom's tendence to be stable and it's charge to apply Columb law
-- Do the ionic reaction when atoms collide
--  When the reaction is done, the atoms stay connected and behave in group
+- Uses Columb law (with customized K constant) to compute attraction between particles considering atom's tendence to stable itself as well as it's charge
+- When atoms collide the ionic reaction is applyed
+- When the reaction is done, the atoms stay connected and behave in group (molecule)
 
 See some images
 
