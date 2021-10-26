@@ -7,27 +7,72 @@ let canvas, context;
 
 let width, height;
 
+const dataFactory = () => ({
+    particlesCount: null,
+    disconnectedParticlesCount: null,
+    connectedParticlesCount: null,
+    moleculesCount: null,
+    moleculeMaxSize: null,
+});
+
+const data = {
+    elements: dataFactory(),
+    values: dataFactory(),
+};
+
 function start() {
     canvas = initCanvas();
     context = canvas.getContext('2d');
     width = window.innerWidth;
     height = window.innerHeight;
+
+    data.elements.particlesCount = document.getElementById('data-particles-count');
+    data.elements.disconnectedParticlesCount = document.getElementById('data-disconnected-particles-count');
+    data.elements.connectedParticlesCount = document.getElementById('data-connected-particles-count');
+    data.elements.moleculesCount = document.getElementById('data-molecules-count');
+    data.elements.moleculeMaxSize = document.getElementById('data-largest-molecule-size-count');
+
     updateCanvas(canvas, context, backgroundColor);
     initSimulation();
     loop();
 }
+
+const drawData = () => {
+    Object.keys(data.values).forEach(key => {
+        data.elements[key].innerText = data.values[key];
+    });
+};
+
+const updateData = () => {
+
+    const connectedAtoms = particles.filter(particle => particle.connectedParticles.size > 0);
+    const disconnectedAtoms = particles.filter(particle => particle.connectedParticles.size === 0);
+
+    data.values.particlesCount = particles.length;
+    data.values.connectedParticlesCount = connectedAtoms.length;
+    data.values.disconnectedParticlesCount = disconnectedAtoms.length;
+    
+    data.values.moleculeMaxSize = connectedAtoms
+        .reduce((a, b) => Math.max(a, b.connectedParticles.size), 0);
+
+    data.values.moleculesCount = 0;
+        // .map(particle => particle.connectedParticles.size)
+        // .reduce((a, b) => a + b, 0);
+};
 
 const draw = () => {
     updateCanvas(canvas, context, backgroundColor);
     particles.forEach(particle => {
         particle.draw(context);
     });
+    drawData();
 };
 
 const update = () => {
     particles.forEach(particle => {
         particle.update();
     });
+    updateData();
 };
 
 const loop = () => {
@@ -53,7 +98,9 @@ const initSimulation = () => {
         return;
     }
     particles.push(particleFactory(0, 0, 0, 0));
-    particles.push(particleFactory(400, 400, 0, 0));
+    particles.push(particleFactory(200, 2100, 1000, 0));
+    particles.push(particleFactory(-1000, 1200, 0, 1000));
+    particles.push(particleFactory(-1000, 1000, -1000, 1200));
     console.log(particles);
 };
 
