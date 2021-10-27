@@ -99,6 +99,7 @@ const RANDOM_PARTICLES = true;
 
 const WALLS_REDUCTION_FACTOR = 1;
 const WALL_BASE_SIZE = 10;
+const PARTICLES_COUNT = 30;
 
 const initSimulation = () => {
 
@@ -133,8 +134,7 @@ const initSimulation = () => {
     }
 
     if (RANDOM_PARTICLES) {
-        const particleCount = 40;
-        for (let i = 0; i < particleCount; i++) {
+        for (let i = 0; i < PARTICLES_COUNT; i++) {
             particles.push(particleFactory(minWidth, maxWidth, minHeight, maxHeight));
         }
         return;
