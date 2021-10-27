@@ -1,5 +1,6 @@
 import { initCanvas, updateCanvas } from './helpers.js';
 import {particles, particleFactory} from './particle.js';
+import {walls, wallFactory} from './wall.js';
 
 const backgroundColor = '#000';
 
@@ -69,6 +70,9 @@ const updateData = () => {
 
 const draw = () => {
     updateCanvas(canvas, context, backgroundColor);
+    walls.forEach(wall => {
+        wall.draw(context);
+    });
     particles.forEach(particle => {
         particle.draw(context);
     });
@@ -93,12 +97,19 @@ window.addEventListener('load', start);
 const RANDOM_PARTICLES = true;
 
 const initSimulation = () => {
+
+    walls.push(wallFactory(-width, -height, width * 2, 10));
+    walls.push(wallFactory(-width, height, width * 2, 10));
+    walls.push(wallFactory(-width, -height, 10, height* 2));
+    walls.push(wallFactory(width, -height, 10, height* 2));
+
+
     if (RANDOM_PARTICLES) {
         const particleCount = 40;
-        const minWidth = -width * 1;
-        const maxWidth = width * 1;
-        const minHeight = -height * 1;
-        const maxHeight = height * 1;
+        const minWidth = -width / 2;
+        const maxWidth = width / 2;
+        const minHeight = -height / 2;
+        const maxHeight = height / 2;
         for (let i = 0; i < particleCount; i++) {
             particles.push(particleFactory(minWidth, maxWidth, minHeight, maxHeight));
         }
