@@ -237,6 +237,7 @@ export const particleFactory = (minWidth, maxWidth, minHeight, maxHeight, custom
     },
     computeOrganizationVelocity: function () {
         const COLLIDING_OFFSET = 1.5;
+        const radius = this.coreRadius + this.electrospheresRadius;
         for (const particleId of this.connectedParticles) {
             if (particleId === this.id) {
                 continue;
@@ -250,7 +251,6 @@ export const particleFactory = (minWidth, maxWidth, minHeight, maxHeight, custom
                 y: particle.position.y - this.position.y,
             };
             const distance = Math.hypot(distanceVector.x, distanceVector.y);
-            const radius = this.coreRadius + this.electrospheresRadius;
             const particleRadius = particle.coreRadius + particle.electrospheresRadius;
             const sumOfRadius = radius + particleRadius;
             if (distance > sumOfRadius * COLLIDING_OFFSET) {
