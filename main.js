@@ -81,7 +81,7 @@ const draw = () => {
 
 const update = () => {
     particles.forEach(particle => {
-        particle.update();
+        particle.update(walls);
     });
     updateData();
 };
@@ -94,14 +94,14 @@ const loop = () => {
 
 window.addEventListener('load', start);
 
-const RANDOM_PARTICLES = true;
+const RANDOM_PARTICLES = false;
 
 const initSimulation = () => {
 
-    walls.push(wallFactory(-width, -height, width * 2, 10));
-    walls.push(wallFactory(-width, height, width * 2, 10));
-    walls.push(wallFactory(-width, -height, 10, height* 2));
-    walls.push(wallFactory(width, -height, 10, height* 2));
+    walls.push(wallFactory(-width, -height / 10, width * 2, 10, 'top'));
+    walls.push(wallFactory(-width, height / 10, width * 2, 10, 'bottom'));
+    walls.push(wallFactory(-width / 10, -height, 10, height* 2, 'left'));
+    walls.push(wallFactory(width / 10, -height, 10, height* 2, 'right'));
 
 
     if (RANDOM_PARTICLES) {
@@ -123,6 +123,9 @@ const initSimulation = () => {
     // particles.push(particleFactory(0, 0, -10, 0, 43));
     // particles.push(particleFactory(30, 65, 0, 0, 78));
     // particles.push(particleFactory(-60, -65, 0, 0, 27));
+    // case 3
+    particles.push(particleFactory(0, 0, 0, 0, 1));
+    particles.push(particleFactory(-20, -20, 0, 0, 1));
     console.log(particles);
 };
 
