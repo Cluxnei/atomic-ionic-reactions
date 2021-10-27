@@ -14,14 +14,17 @@ const BASE_RADIUS = {
 };
 
 const FIXED_RADIUS = 20;
-
+const GLOBAL_ALPHA = 0.75;
 // const ELECTROSPHERE_OFFSET = [15, 25, 30, 40, 50, 60, 15];
 const ELECTROSPHERE_OFFSET = [10, 10, 10, 10, 10, 10, 10];
 const ELECTROSPHERES_NAMES = ['s', 'p', 'd', 'f', 'g', 'h', 'i'];
 const ELECTRONS_PER_ELECTROSPHERE = [2, 8, 18, 32, 32, 18, 2];
 const K = 5;
 
-const randomInPeriodicTable = () => periodicTable[random(0, periodicTable.length, true)];
+const randomInPeriodicTable = (customAtomicNumber = null) => 
+    customAtomicNumber 
+    ? periodicTable.find(atom => atom.atomicNumber === customAtomicNumber)
+    : periodicTable[random(0, periodicTable.length, true)];
 
 const applyColumbLaw = (chargeA, chargeB, distance) => {
     return K * -(chargeA * chargeB) / (distance * distance);
@@ -44,8 +47,8 @@ const computeElectrospheres = (electrons) => {
     return n;
 };
 
-export const particleFactory = (minWidth, maxWidth, minHeight, maxHeight) => ({
-    ...randomInPeriodicTable(),
+export const particleFactory = (minWidth, maxWidth, minHeight, maxHeight, customAtomicNumber = null) => ({
+    ...randomInPeriodicTable(customAtomicNumber),
     id: getNextParticleId(),
     position: {x: random(minWidth, maxWidth), y: random(minHeight, maxHeight)},
     velocity: {x: 0, y: 0},
@@ -76,6 +79,7 @@ export const particleFactory = (minWidth, maxWidth, minHeight, maxHeight) => ({
         this.computeMolecularAcceleration();
         this.computeVelocity();
         this.computeMolecularVelocity();
+        this.computeOrganizationVelocity();
         this.computePosition();
     },
     collide: function (particle) {
@@ -231,6 +235,38 @@ export const particleFactory = (minWidth, maxWidth, minHeight, maxHeight) => ({
         }
         this.velocity = {...velocityResultant};
     },
+    computeOrganizationVelocity: function () {
+        const COLLIDING_OFFSET = 1.5;
+        for (const particleId of this.connectedParticles) {
+            if (particleId === this.id) {
+                continue;
+            }
+            const particle = particles.find(p => p.id === particleId);
+            if (!particle || particle === this) {
+                continue;
+            }
+            const distanceVector = {
+                x: particle.position.x - this.position.x,
+                y: particle.position.y - this.position.y,
+            };
+            const distance = Math.hypot(distanceVector.x, distanceVector.y);
+            const radius = this.coreRadius + this.electrospheresRadius;
+            const particleRadius = particle.coreRadius + particle.electrospheresRadius;
+            const sumOfRadius = radius + particleRadius;
+            if (distance > sumOfRadius * COLLIDING_OFFSET) {
+                continue;
+            }
+            const offset = distance - sumOfRadius;
+            const normalized = normalizeVector(distanceVector);
+            if (offset >= -COLLIDING_OFFSET && offset <= COLLIDING_OFFSET) {
+                continue;
+            }
+            const attractionCharge = offset / 10;
+            const force = applyColumbLaw(offset < 0 ? attractionCharge : -attractionCharge, attractionCharge, offset);
+            this.velocity.x = normalized.x * force;
+            this.velocity.y = normalized.y * force;
+        }
+    },
     drawCore: function (context) {
         context.fillStyle = this.color;
         context.beginPath();
@@ -287,7 +323,7 @@ export const particleFactory = (minWidth, maxWidth, minHeight, maxHeight) => ({
         context.fillText(text, this.position.x - halfRadius, this.position.y + halfRadius / 2.5);
     },
     drawConnections: function(context) {
-        context.strokeStyle = '#fff';
+        context.strokeStyle = `rgba(255, 255, 255, ${GLOBAL_ALPHA})`;
         for (const id of this.connectedParticles) {
             const particle = particles.find(p => p.id === id);
             context.beginPath();
@@ -297,7 +333,7 @@ export const particleFactory = (minWidth, maxWidth, minHeight, maxHeight) => ({
         }
     },
     draw: function(context) {
-        context.globalAlpha = 0.75;
+        context.globalAlpha = GLOBAL_ALPHA;
         this.drawCore(context);
         this.drawConnections(context);
         this.drawText(context);
