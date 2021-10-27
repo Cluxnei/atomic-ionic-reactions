@@ -60,7 +60,7 @@ export const particleFactory = (minWidth, maxWidth, minHeight, maxHeight, custom
     electrospheres: 0,
     electrospheresRadius: 0,
     connectedParticles: new Set(),
-    update: function () {
+    update: function (walls) {
         if (this.updateCoreRadius) {
             // this.coreRadius = BASE_RADIUS.neutrons * this.neutrons + BASE_RADIUS.protons * this.protons;
             this.coreRadius = FIXED_RADIUS;
@@ -71,6 +71,18 @@ export const particleFactory = (minWidth, maxWidth, minHeight, maxHeight, custom
         this.computeElectrospheresRadius();
         this.computeCharge();
         this.computeTendenceToStable();
+
+        const collidingWithWall = this.collidingWithWall(walls)
+
+        if (collidingWithWall) {
+            const invertX = collidingWithWall.invertX();
+            const invertY = collidingWithWall.invertY();
+            this.velocity = {
+                x: invertX ? -this.velocity.x : this.velocity.x,
+                y: invertY ? -this.velocity.y : this.velocity.y,
+            };
+        }
+
         const collidingWith = this.collidingWith();
         if (collidingWith) {
             this.collide(collidingWith);
@@ -81,6 +93,9 @@ export const particleFactory = (minWidth, maxWidth, minHeight, maxHeight, custom
         this.computeMolecularVelocity();
         this.computeOrganizationVelocity();
         this.computePosition();
+    },
+    collidingWithWall: function (walls) {
+        return walls.find(wall => wall.isCollidingWithParticle(this));
     },
     collide: function (particle) {
         if (this.tendenceToStable > 0 && particle.tendenceToStable < 0) {
