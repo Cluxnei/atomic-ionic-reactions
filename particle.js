@@ -75,12 +75,12 @@ export const particleFactory = (minWidth, maxWidth, minHeight, maxHeight, custom
         const collidingWithWall = this.collidingWithWall(walls)
 
         if (collidingWithWall) {
-            console.log(this);
-            return;
-            // this.velocity = {
-            //     x: -this.velocity.x,
-            //     y: -this.velocity.y,
-            // };
+            const invertX = collidingWithWall.invertX();
+            const invertY = collidingWithWall.invertY();
+            this.velocity = {
+                x: invertX ? -this.velocity.x : this.velocity.x,
+                y: invertY ? -this.velocity.y : this.velocity.y,
+            };
         }
 
         const collidingWith = this.collidingWith();

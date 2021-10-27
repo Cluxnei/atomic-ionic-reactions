@@ -14,6 +14,12 @@ export const wallFactory = (x, y, width, height, orientation) => ({
         context.fillStyle = this.color;
         context.fillRect(this.position.x, this.position.y, this.width, this.height);
     },
+    invertX: function() {
+        return this.left || this.right;
+    },
+    invertY: function() {
+        return this.top || this.bottom;
+    },
     isCollidingWithParticle: function (particle) {
         const radius = particle.coreRadius + particle.electrospheresRadius;
         if (this.top) {
