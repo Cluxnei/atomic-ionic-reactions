@@ -1,6 +1,7 @@
 import { initCanvas, updateCanvas } from './helpers.js';
 import {particles, particleFactory} from './particle.js';
 import {walls, wallFactory} from './wall.js';
+import {periodicTable} from './periodicTable.js';
 
 const backgroundColor = '#000';
 
@@ -94,22 +95,45 @@ const loop = () => {
 
 window.addEventListener('load', start);
 
-const RANDOM_PARTICLES = false;
+const RANDOM_PARTICLES = true;
+
+const WALLS_REDUCTION_FACTOR = 1;
+const WALL_BASE_SIZE = 10;
 
 const initSimulation = () => {
 
-    walls.push(wallFactory(-width, -height / 10, width * 2, 10, 'top'));
-    walls.push(wallFactory(-width, height / 10, width * 2, 10, 'bottom'));
-    walls.push(wallFactory(-width / 10, -height, 10, height* 2, 'left'));
-    walls.push(wallFactory(width / 10, -height, 10, height* 2, 'right'));
+    walls.push(wallFactory(-width, -height / WALLS_REDUCTION_FACTOR, width * 2, WALL_BASE_SIZE, 'top'));
+    walls.push(wallFactory(-width, height / WALLS_REDUCTION_FACTOR, width * 2, WALL_BASE_SIZE, 'bottom'));
+    walls.push(wallFactory(-width / WALLS_REDUCTION_FACTOR, -height, WALL_BASE_SIZE, height* 2, 'left'));
+    walls.push(wallFactory(width / WALLS_REDUCTION_FACTOR, -height, WALL_BASE_SIZE, height* 2, 'right'));
 
+    const largestParticle = particleFactory(0, 0, 0, 0, periodicTable[periodicTable.length - 1].atomicNumber);
+    largestParticle.update([]);
+    const maxRadius = largestParticle.coreRadius + largestParticle.electrospheresRadius;
+
+    let minWidth = -width / 2;
+    const leftWall = walls.find(wall => wall.left);
+    if (leftWall) {
+        minWidth = leftWall.position.x + leftWall.width + maxRadius;
+    }
+    let maxWidth = width / 2;
+    const rightWall = walls.find(wall => wall.right);
+    if (rightWall) {
+        maxWidth = rightWall.position.x - rightWall.width - maxRadius;
+    }
+    let minHeight = -height / 2;
+    const topWall = walls.find(wall => wall.top);
+    if (topWall) {
+        minHeight = topWall.position.y + topWall.height + maxRadius;
+    }
+    let maxHeight = height / 2;
+    const bottomWall = walls.find(wall => wall.bottom);
+    if (bottomWall) {
+        maxHeight = bottomWall.position.y - bottomWall.height - maxRadius;
+    }
 
     if (RANDOM_PARTICLES) {
         const particleCount = 40;
-        const minWidth = -width / 2;
-        const maxWidth = width / 2;
-        const minHeight = -height / 2;
-        const maxHeight = height / 2;
         for (let i = 0; i < particleCount; i++) {
             particles.push(particleFactory(minWidth, maxWidth, minHeight, maxHeight));
         }
@@ -126,6 +150,9 @@ const initSimulation = () => {
     // case 3
     particles.push(particleFactory(0, 0, 0, 0, 1));
     particles.push(particleFactory(-20, -20, 0, 0, 1));
+    particles.push(particleFactory(0, 0, 20, 20, 1));
+    particles.push(particleFactory(-20, -20, -20, -20, 1));
+    particles.push(particleFactory(-20, -20, -25, -25, 1));
     console.log(particles);
 };
 
