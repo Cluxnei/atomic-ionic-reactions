@@ -104,10 +104,14 @@ const initSimulation = () => {
         }
         return;
     }
-    particles.push(particleFactory(0, 0, 0, 0));
-    particles.push(particleFactory(200, 2100, 1000, 0));
-    particles.push(particleFactory(-1000, 1200, 0, 1000));
-    particles.push(particleFactory(-1000, 1000, -1000, 1200));
+    // case 1
+    // particles.push(particleFactory(0, 0, 0, 0, 16));
+    // particles.push(particleFactory(30, 65, 0, 0, 1));
+    // particles.push(particleFactory(-60, -65, 0, 0, 1));
+    // case 2
+    // particles.push(particleFactory(0, 0, -10, 0, 43));
+    // particles.push(particleFactory(30, 65, 0, 0, 78));
+    // particles.push(particleFactory(-60, -65, 0, 0, 27));
     console.log(particles);
 };
 
